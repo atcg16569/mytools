@@ -13,4 +13,9 @@ def merge(cfile,pfile):
     newc.close()
     return
 import sys
-merge(sys.argv[1],sys.argv[2])
+try:
+    merge(sys.argv[1],sys.argv[2])
+except:
+    print (sys.exc_info()[1])
+else:
+    print ("Succeed!")
