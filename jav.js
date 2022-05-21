@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        JavIDÏÂÔØ
+// @name        JavIDä¸‹è½½
 // @namespace   jenhao-js
 // @include     /https:\/\/javdb\d*\.com\/lists\/*/
 // @grant       none
@@ -14,7 +14,7 @@ const host=`${location.protocol}//${location.hostname}`,
         'Accept': 'text/html,application/xhtml+xml,application/xml'}},
       selectors={name:".title>span[class*='name']",pages:'.pagination-link',current:'.is-current'};
 
-/*¼ì²â×îºóÒ»Ò³ÊÇ·ñº¬ÓÐÏÂÒ»Ò³
+/*æ£€æµ‹æœ€åŽä¸€é¡µæ˜¯å¦å«æœ‰ä¸‹ä¸€é¡µ
 function checkNext(url){
   return fetch(url,head).then(response => response.text())
     .then(html => new DOMParser().parseFromString(html, 'text/html'))
@@ -37,13 +37,18 @@ let current=$(selectors.current),pages=$(selectors.pages),name=$(selectors.name)
 
 function Movies(){
   let movies=[],
-      items=$('div.grid-item'),pNum=$(selectors.current).text().trim();
+      // listCSS=".movie-list",
+      itemCSS="div.item",
+      idCSS=".video-title>strong",
+      dateCSS="div.meta",
+      list=$(itemCSS),
+      pNum=$(selectors.current).text().trim();
   if (arguments.length!=0){
-    items=$(arguments[0]).find('div.grid-item'),pNum=$(arguments[0]).find(selectors.current).text().trim()
+    list=$(arguments[0]).find(itemCSS),pNum=$(arguments[0]).find(selectors.current).text().trim()
   }
-  items.each(( index, element )=>{
-    let id=$(element).find('div.uid').text().trim(),
-        meta=$(element).find('div.meta').text().trim();
+  list.each(( index, element )=>{
+    let id=$(element).find(idCSS).text().trim(),
+        meta=$(element).find(dateCSS).text().trim();
     movies.push({id:id,date:meta})
   });
   return {page:pNum,movies:movies}
@@ -87,7 +92,7 @@ function list2a(list){
 	return a
 }
 
-$("<button id='jsonDown'>ÏÂÔØjson</button>").appendTo($(".title"));
+$("<button id='jsonDown'>ä¸‹è½½json</button>").appendTo($(".title"));
 const downloadEvent=new MouseEvent("click",{
 			bubbles:true,
 			cancelable:true,
@@ -95,6 +100,12 @@ const downloadEvent=new MouseEvent("click",{
 		}),
 json=document.querySelector("#jsonDown");
 json.addEventListener("click",()=>{
-  List().then(lt=>list2a(JSON.stringify(lt)).dispatchEvent(downloadEvent))
+  List().then(lt=>{
+    list2a(JSON.stringify(lt)).dispatchEvent(downloadEvent);
+    let total=0;
+    lt.forEach(p=>{
+      total=total+p.movies.length;
+    });
+    console.log(total);
+  })
 });
-
