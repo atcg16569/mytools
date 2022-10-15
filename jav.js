@@ -109,3 +109,45 @@ json.addEventListener("click",()=>{
     console.log(total);
   })
 });
+
+// ==UserScript==
+// @name         dbsearch
+// @namespace    https://viayoo.com/
+// @version      0.1
+// @run-at       document-end
+// @match        https://javdb*.com/lists/*
+// @match        https://javdb*.com/users/list*
+// @grant        none
+// ==/UserScript==
+var appendlocation="a.box",
+    idlocation="div.video-title>strong";
+
+if (location.hostname.match("users")!=null){
+	appendlocation="div.item";
+};
+
+function search(url,id){
+	let a=document.createElement("a");
+	a.href = url.link.replace('$id',id);
+	a.target="_blank";
+	a.style="margin:0 auto;";
+	a.innerText = `${url.title}.${id}`;
+	let br = document.createElement("br");
+	a.appendChild(br);
+	return a;
+};
+
+const netflav = {title : "netflav", link : "https://netflav.com/search?type=code&keyword=$id"},
+      jable = {title : "jable", link : "https://jable.tv/search/$id/"};
+
+try{
+	let boxs = document.querySelectorAll(appendlocation);
+	for (var box of boxs){
+		let id = box.querySelector(idlocation).innerText;
+		let netflavA = search(netflav,id),jableA = search(jable,id);
+		box.append(netflavA);
+		box.append(jableA);
+	};
+}catch(e){
+	alert(e);
+};
