@@ -3,57 +3,41 @@
 // @namespace   jenhao-js
 // @include     /https:\/\/javdb\d*\.com\/lists\/*/
 // @grant       none
+// @run-at      document-end
 // @version     1.0
 // @author      Jenhao
 // @description download jav id list
-// @require https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js
-// @require https://cdn.jsdelivr.net/npm/@violentmonkey/dom@1
 // ==/UserScript==
-const host=`${location.protocol}//${location.hostname}`,
-      head={headers:{'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0',
+const head={headers:{'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml'}},
-      selectors={name:".title>span[class*='name']",pages:'.pagination-link',current:'.is-current'};
+      pagecss={title:".title>span[class*='name']",pages:'.pagination-link',current:'.is-current'},
+      moviecss={item:"div.item",id:".video-title>strong",date:"div.meta"};
 
-/*检测最后一页是否含有下一页
-function checkNext(url){
-  return fetch(url,head).then(response => response.text())
-    .then(html => new DOMParser().parseFromString(html, 'text/html'))
-    .then(doc => {
-      let next_a=$(doc).find(selectors.next);
-      if(next_a){
-        return next_a.attr('href')
-      }else{
-        return false
-      }
-    })
+var page={current:document.querySelector(pagecss.current),pages:document.querySelectorAll(pagecss.pages),title:document.querySelector(pagecss.title)},
+    current2last=[],currentIndex;
+for(let entry of page.pages.entries()) {
+  if(entry[1]==page.current){
+    currentIndex=entry[0];
+  }
+  if(entry[0]>currentIndex){
+    current2last.push(entry[1]);
+  }
 }
-*/
-let current=$(selectors.current),pages=$(selectors.pages),name=$(selectors.name).text().trim(),
-    c2l=$(selectors.pages).map((index,page)=>{
-      if(index>current.index(selectors.pages)){
-        return page;
-      }
-    }).get();
 
 function Movies(){
-  let movies=[],
-      // listCSS=".movie-list",
-      itemCSS="div.item",
-      idCSS=".video-title>strong",
-      dateCSS="div.meta",
-      list=$(itemCSS),
-      pNum=$(selectors.current).text().trim();
+  let mp=[],
+      movies=document.querySelectorAll(moviecss.item),
+      pNum=page.current.textContent.trim();
   if (arguments.length!=0){
-    list=$(arguments[0]).find(itemCSS),pNum=$(arguments[0]).find(selectors.current).text().trim()
+    movies=arguments[0].querySelectorAll(moviecss.item),pNum=arguments[0].querySelector(pagecss.current).textContent.trim();
   }
-  list.each(( index, element )=>{
-    let id=$(element).find(idCSS).text().trim(),
-        meta=$(element).find(dateCSS).text().trim();
-    movies.push({id:id,date:meta})
-  });
-  return {page:pNum,movies:movies}
+  for(let mItem of movies.values()){
+    let id=mItem.querySelector(moviecss.id).textContent.trim(),
+        date=mItem.querySelector(moviecss.date).textContent.trim();
+    mp.push({id:id,date:date})
+  }
+  return {page:pNum,movies:mp}
 }
-
 function reqNext(url){
   let nextFetch=new Promise(resolve=>{
     setTimeout(resolve,getRandomArbitrary(1, 10)*1000,
@@ -64,35 +48,34 @@ function reqNext(url){
   });
   return nextFetch
 }
-
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
-
-function List(){
-  let cMovies=Movies(),list=[];
-  list.push(cMovies);
-  if(c2l.length!=0){
-    c2l.forEach(p=>list.push(reqNext(p.href))
+function c2lMovieList(){
+  let cMovies=Movies(),totalList=[];
+  totalList.push(cMovies);//当前页
+  if(current2last.length!=0){
+    current2last.forEach(p=>totalList.push(reqNext(p.href))
                );
   }
-  return Promise.all(list)
+  return Promise.all(totalList)
 }
-//List().then(console.log);
+//c2lMovieList().then(console.log);
+
 function list2a(list){
   let uri=`data:,${list}`,
   a=document.createElement('a');
   //a.textContent="download json";
   a.href=uri;
-  if (c2l.length==0){
-    a.download=`${name}.json`;
+  if (current2last.length==0){
+    a.download=`${page.title.textContent.trim()}.json`;
   }else{
-    a.download=`${name}_p${current.text().trim()}-${c2l[c2l.length-1].textContent.trim()}.json`;
+    a.download=`${page.title.textContent.trim()}_p${page.current.textContent.trim()}-${current2last[current2last.length-1].textContent.trim()}.json`;
   }
 	return a
 }
 
-$("<button id='jsonDown'>下载json</button>").appendTo($(".title"));
+page.title.insertAdjacentHTML('afterend',"<button id='jsonDown'>下载json</button>");
 const downloadEvent=new MouseEvent("click",{
 			bubbles:true,
 			cancelable:true,
@@ -100,7 +83,7 @@ const downloadEvent=new MouseEvent("click",{
 		}),
 json=document.querySelector("#jsonDown");
 json.addEventListener("click",()=>{
-  List().then(lt=>{
+  c2lMovieList().then(lt=>{
     list2a(JSON.stringify(lt)).dispatchEvent(downloadEvent);
     let total=0;
     lt.forEach(p=>{
@@ -109,6 +92,7 @@ json.addEventListener("click",()=>{
     console.log(total);
   })
 });
+
 
 // ==UserScript==
 // @name         dbsearch
