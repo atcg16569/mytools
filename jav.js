@@ -27,7 +27,12 @@ for(let entry of page.pages.entries()) {
 function Movies(){
   let mp=[],
       movies=document.querySelectorAll(moviecss.item),
-      pNum=page.current.textContent.trim();
+      pNum;
+  if(page.current==null){
+    pNum=1
+  }else{
+    pNum=page.current.textContent.trim()
+  }
   if (arguments.length!=0){
     movies=arguments[0].querySelectorAll(moviecss.item),pNum=arguments[0].querySelector(pagecss.current).textContent.trim();
   }
@@ -62,20 +67,25 @@ function c2lMovieList(){
 }
 //c2lMovieList().then(console.log);
 
-function list2a(list){
-  let uri=`data:,${list}`,
+function title(total){
+  let title;
+  if (current2last.length==0){
+    title=`${page.title.textContent.trim()}_${total}.json`;
+  }else{
+    title=`${page.title.textContent.trim()}_${total}p${page.current.textContent.trim()}-${current2last[current2last.length-1].textContent.trim()}.json`;
+  }
+	return title
+}
+function list2a(listString,total){
+  let uri=`data:,${listString}`,
   a=document.createElement('a');
   //a.textContent="download json";
   a.href=uri;
-  if (current2last.length==0){
-    a.download=`${page.title.textContent.trim()}.json`;
-  }else{
-    a.download=`${page.title.textContent.trim()}_p${page.current.textContent.trim()}-${current2last[current2last.length-1].textContent.trim()}.json`;
-  }
+  a.download=title(total);
 	return a
 }
-
 page.title.insertAdjacentHTML('afterend',"<button id='jsonDown'>下载json</button>");
+
 const downloadEvent=new MouseEvent("click",{
 			bubbles:true,
 			cancelable:true,
@@ -84,11 +94,11 @@ const downloadEvent=new MouseEvent("click",{
 json=document.querySelector("#jsonDown");
 json.addEventListener("click",()=>{
   c2lMovieList().then(lt=>{
-    list2a(JSON.stringify(lt)).dispatchEvent(downloadEvent);
     let total=0;
     lt.forEach(p=>{
       total=total+p.movies.length;
     });
+    list2a(JSON.stringify(lt),total).dispatchEvent(downloadEvent);
     console.log(total);
   })
 });
