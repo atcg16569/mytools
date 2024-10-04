@@ -110,7 +110,8 @@ json.addEventListener("click",()=>{
 // @version      0.1  
 // @run-at       document-end  
 // @match        https://javdb*.com/lists/*  
-// @match        https://javdb*.com/users/list*  
+// @match        https://javdb*.com/users/list*
+// @match        https://javdb*.com/v/*
 // @include      /https:\/\/www\.javbus\.com\/.+-.+/  
 // @grant        none  
 // ==/UserScript==  
@@ -118,6 +119,9 @@ var appendlocation="a.box",idlocation="div.video-title>strong";
   
 if (location.hostname.match("users")!=null){  
     appendlocation="div.item";  
+}else if(location.hostname.match("lists")==null){
+  idlocation=".first-block > span:nth-child(2)";
+  appendlocation=".panel";
 };  
 if (location.hostname=="www.javbus.com"){  
     appendlocation=".info";  
