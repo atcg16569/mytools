@@ -8,6 +8,16 @@
 // @author      Jenhao
 // @description download jav id list
 // ==/UserScript==
+// ==UserScript==
+// @name        JavID
+// @namespace   jenhao-js
+// @include     /https:\/\/javdb\d*\.com\/lists\/*/
+// @grant       none
+// @run-at      document-end
+// @version     1.0
+// @author      Jenhao
+// @description download jav id list
+// ==/UserScript==
 const head={headers:{'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml'}},
       pagecss={title:".title>span[class*='name']",pages:'.pagination-link',current:'.is-current'},
@@ -27,12 +37,7 @@ for(let entry of page.pages.entries()) {
 function Movies(){
   let mp=[],
       movies=document.querySelectorAll(moviecss.item),
-      pNum;
-  if(page.current==null){
-    pNum=1
-  }else{
-    pNum=page.current.textContent.trim()
-  }
+      pNum=page.current.textContent.trim();
   if (arguments.length!=0){
     movies=arguments[0].querySelectorAll(moviecss.item),pNum=arguments[0].querySelector(pagecss.current).textContent.trim();
   }
@@ -66,26 +71,25 @@ function c2lMovieList(){
   return Promise.all(totalList)
 }
 //c2lMovieList().then(console.log);
-
-function title(total){
+function title(total,form){
   let title;
   if (current2last.length==0){
-    title=`${page.title.textContent.trim()}_${total}.json`;
+    title=`${page.title.textContent.trim()}_${total}.${form}`;
   }else{
-    title=`${page.title.textContent.trim()}_${total}p${page.current.textContent.trim()}-${current2last[current2last.length-1].textContent.trim()}.json`;
+    title=`${page.title.textContent.trim()}_${total}p${page.current.textContent.trim()}-${current2last[current2last.length-1].textContent.trim()}.${form}`;
   }
 	return title
 }
-function list2a(listString,total){
-  let uri=`data:,${listString}`,
+function list2a(listString,total,form){
+  let uri=`data:text/plain;charset=UTF-8,${listString}`,
   a=document.createElement('a');
   //a.textContent="download json";
   a.href=uri;
-  a.download=title(total);
+  a.download=title(total,form);
 	return a
 }
 page.title.insertAdjacentHTML('afterend',"<button id='jsonDown'>下载json</button>");
-
+page.title.insertAdjacentHTML('afterend',"<button id='ankiDown'>下载anki</button>");
 const downloadEvent=new MouseEvent("click",{
 			bubbles:true,
 			cancelable:true,
@@ -98,7 +102,21 @@ json.addEventListener("click",()=>{
     lt.forEach(p=>{
       total=total+p.movies.length;
     });
-    list2a(JSON.stringify(lt),total).dispatchEvent(downloadEvent);
+    list2a(JSON.stringify(lt), total,"json").dispatchEvent(downloadEvent);
+    console.log(total);
+  })
+});
+anki=document.querySelector("#ankiDown");
+anki.addEventListener("click",()=>{
+  c2lMovieList().then(lt=>{
+    let total=0,astring=[];
+    lt.forEach(p=>{
+      total=total+p.movies.length;
+      p.movies.forEach(m=>{
+        astring.push(`${m.id};${m.date}`)
+      });
+    });
+    list2a(astring.join('\n'), total,"txt").dispatchEvent(downloadEvent);
     console.log(total);
   })
 });
