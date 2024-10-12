@@ -1,17 +1,8 @@
 // ==UserScript==
-// @name        JavID下载
-// @namespace   jenhao-js
-// @include     /https:\/\/javdb\d*\.com\/lists\/*/
-// @grant       none
-// @run-at      document-end
-// @version     1.0
-// @author      Jenhao
-// @description download jav id list
-// ==/UserScript==
-// ==UserScript==
 // @name        JavID
 // @namespace   jenhao-js
 // @include     /https:\/\/javdb\d*\.com\/lists\/*/
+// @match       https://javdb*.com/series/*
 // @grant       none
 // @run-at      document-end
 // @version     1.0
@@ -37,7 +28,12 @@ for(let entry of page.pages.entries()) {
 function Movies(){
   let mp=[],
       movies=document.querySelectorAll(moviecss.item),
-      pNum=page.current.textContent.trim();
+	  pNum;
+  if (page.current==null){
+    pNum=0;
+  }else{
+    pNum=page.current.textContent.trim();
+  }
   if (arguments.length!=0){
     movies=arguments[0].querySelectorAll(moviecss.item),pNum=arguments[0].querySelector(pagecss.current).textContent.trim();
   }
