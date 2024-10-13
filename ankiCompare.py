@@ -15,6 +15,7 @@ def anki_compare(file):
         year = p.match(data[1]).group()
         mid = data[0]
         checkFile = year + ".txt"
+        # android path/
         checkPath = os.getcwd() + "\\" + checkFile
         if os.path.isfile(checkPath):
             with open(checkFile) as op:
