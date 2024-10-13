@@ -8,6 +8,7 @@ def anki_compare(file):
     p = re.compile(r"\d{4}")
     count = 0
     t = 0
+    et = 0
     for line in f:
         t += 1
         data = line.split(';')
@@ -26,7 +27,10 @@ def anki_compare(file):
                     wf.write(line)
                 count += 1
                 print(f"write {mid} to {checkFile}")
-    print(f"total {t},wrote {count}")
+            else:
+                et += 1
+                print(f"{mid} in {checkFile}")
+    print(f"total {t},wrote {count},exist {et}")
     f.close()
 
 
@@ -37,4 +41,3 @@ if __name__ == '__main__':
     else:
         print(sys.argv)
     sys.exit()
-    
