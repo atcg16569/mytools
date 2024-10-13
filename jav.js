@@ -14,7 +14,9 @@ const head={headers:{'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv
       pagecss={title:".title>span[class*='name']",pages:'.pagination-link',current:'.is-current'},
       moviecss={item:"div.item",id:".video-title>strong",date:"div.meta"};
 
-var page={current:document.querySelector(pagecss.current),pages:document.querySelectorAll(pagecss.pages),title:document.querySelector(pagecss.title)},
+var page={current:document.querySelector(pagecss.current),
+	  pages:document.querySelectorAll(pagecss.pages),
+	  title:document.querySelector(pagecss.title)},
     current2last=[],currentIndex;
 for(let entry of page.pages.entries()) {
   if(entry[1]==page.current){
