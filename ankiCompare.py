@@ -17,8 +17,7 @@ def anki_compare(file):
         data = line.split(';')
         year = p.match(data[1]).group()
         mid = data[0]
-        checkPa = f"{year}(\.\d+)*\.txt"
-        checkFp = re.compile(checkPa)
+        checkFp = re.compile(year+r"(\.\d+)*\.txt")
         exList = []  # 匹配存在目录 
         exContent = ""  # 合并检查内容
         writePath = ""  # 写入目标
