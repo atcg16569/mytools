@@ -32,35 +32,38 @@ def anki_compare(file):
         exFileN = len(exList)
         if exFileN != 0:
             up500 = 0
+            findRe = 0
             for exF in exList:
                 if os.path.isfile(exF):
                     with open(exF) as exOp:
                         lin = len(exOp.readlines())
                     with open(exF) as exRp:
-                        exContent += exRp.read()
+                        if mid in exRp.read():
+                            findRe += 1
                     if len(writePath) == 0 and lin < 500:
                         writePath += exF
                     if lin >= 500:
                         up500 += 1
-            if up500 == exFileN and mid not in exContent:
-                writePath += f"{yearsD}{year}.{exFileN}.txt"
-                newT = open(writePath, "x")
-                newT.write(line)
-                newT.close()
-                count += 1
-                print(f"write {mid} to {writePath}")
-            elif mid not in exContent and writePath != "":
-                read = open(writePath)
-                newL = open(writePath, "a")
-                rCon = read.read()
-                if not rCon.endswith("\n") and len(rCon) > 0:
-                    newL.write("\n")
+            if findRe == 0:
+                if up500 == exFileN:
+                    writePath += f"{yearsD}{year}.{exFileN}.txt"
+                    newT = open(writePath, "x")
+                    newT.write(line)
+                    newT.close()
+                    count += 1
+                    print(f"write {mid} to {writePath}")
                 else:
-                    newL.write(line)
-                read.close()
-                newL.close()
-                count += 1
-                print(f"write {mid} to {writePath}")
+                    read = open(writePath)
+                    newL = open(writePath, "a")
+                    rCon = read.read()
+                    if not rCon.endswith("\n") and len(rCon) > 0:
+                        newL.write("\n")
+                    else:
+                        newL.write(line)
+                    read.close()
+                    newL.close()
+                    count += 1
+                    print(f"write {mid} to {writePath}")
             else:
                 et += 1
                 print(f"{mid} In file {year}")
